@@ -23,6 +23,8 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.player = Player(self.screen, self)
         self.all_sprites.add(self.player)
+        self.lady = Lady()
+        self.all_sprites.add(self.lady)
 
         self.running = True
         self.run()

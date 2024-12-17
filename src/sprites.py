@@ -51,6 +51,16 @@ class Player(pg.sprite.Sprite):
 
         self.rect.topleft = self.pos
 
+
+class Lady(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.image.load("assets/blob/OldLady.png")
+        self.image = pg.transform.scale(self.image, (100, 100))
+        self.rect = self.image.get_rect()
+        self.rect.y = 500
+        self.rect.x = 640
+
 class SpriteSheet():
     def __init__(self, image):
         self.sheet = image
