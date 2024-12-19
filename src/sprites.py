@@ -65,22 +65,35 @@ class Player(pg.sprite.Sprite):
         if self.Cooldown == 0:
             self.Cooldown = 30
             if(self.direction=="Right"):
-                attack = MeleeAttack((self.rect.right, self.rect.centery))
+                attack = MeleeAttack((self.rect.right+5, self.rect.centery))
             elif(self.direction=="Left"):
-                attack = MeleeAttack((self.rect.left, self.rect.centery))
+                attack = MeleeAttack((self.rect.left-5, self.rect.centery))
             self.game.attacks_group.add(attack)
             self.game.all_sprites.add(attack)
 
 
 
 class Lady(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,game):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.image.load("assets/blob/OldLady.png")
         self.image = pg.transform.scale(self.image, (100, 100))
         self.rect = self.image.get_rect()
         self.rect.y = 500
         self.rect.x = 640
+        self.game=game
+    def talk(self):
+        print("Collided")
+
+
+class Enemy(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.image.load("assets/blob/LightningKnight.png")
+        self.image = pg.transform.scale(self.image, (100, 100))
+        self.rect = self.image.get_rect()
+        self.rect.y = 100
+        self.rect.x = 800
 
 class MeleeAttack(pg.sprite.Sprite):
     def __init__(self, position):
@@ -89,7 +102,6 @@ class MeleeAttack(pg.sprite.Sprite):
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect(center=position)
         self.lifetime = 10
-
     def update(self):
         self.lifetime -= 1
         if self.lifetime <= 0: 
