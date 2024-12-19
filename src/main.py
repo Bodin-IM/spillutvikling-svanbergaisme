@@ -24,8 +24,10 @@ class Game:
         self.player = Player(self.screen, self)
         self.all_sprites.add(self.player)
         self.lady = Lady()
+        self.enemies=pg.sprite.Group()
+        self.enemies.add(self.lady)
         self.all_sprites.add(self.lady)
-
+        self.attacks_group = pg.sprite.Group()
         self.running = True
         self.run()
 
@@ -45,6 +47,14 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
+        keys = pg.key.get_pressed()
+        if keys[pg.K_SPACE]:
+            attack = self.player.attack()
+            if attack:
+                self.all_sprites.add(attack)
+        collider = pg.sprite.groupcollide(self.attacks_group, self.enemies, False, False)
+        if collider:
+            self.lady.kill()
 
     def draw(self):
         self.screen.fill((50, 50, 50))
