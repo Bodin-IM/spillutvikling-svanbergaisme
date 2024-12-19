@@ -62,3 +62,19 @@ class SpriteSheet():
         image.set_colorkey(colour)
 
         return image
+
+class Enemy(pg.sprite.Sprite):
+    def __init__(self, screen):
+        super().__init__()
+        self.screen = screen
+        self.image = pg.image.load("assets/enemy/1enemy.webp") #First enemy
+        self.image = pg.transform.scale(self.image, (100, 100))
+        self.rect = self.image.get_rect()
+        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
+        self.pos = pg.Vector2(self.rect.center)
+    
+    def update(self):
+        self.pos.x += 1
+        if self.pos.x > SCREEN_WIDTH:
+            self.pos.x = -self.rect.width
+        self.rect.topleft = self.pos

@@ -21,8 +21,13 @@ class Game:
 
     def new(self):        
         self.all_sprites = pg.sprite.Group()
+        self.enemies = pg.sprite.Group()
+
         self.player = Player(self.screen, self)
+        self.enemy = Enemy(self.screen)
+
         self.all_sprites.add(self.player)
+        self.enemies.add(self.enemy)
 
         self.running = True
         self.run()
@@ -43,6 +48,7 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
+        self.enemies.update()
 
     def draw(self):
         self.screen.fill((50, 50, 50))
@@ -50,6 +56,7 @@ class Game:
         self.screen.blit(self.frame_0, (100, 100))
 
         self.all_sprites.draw(self.screen)
+        self.enemies.draw(self.screen) 
 
         pg.display.flip()
 
