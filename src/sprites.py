@@ -15,12 +15,18 @@ class Player(pg.sprite.Sprite):
         self.gravity = 10
         self.jumping = False
         self.jump_timer = 0
+        self.Cooldown = 0
+        self.direction="Right"
 
     def update(self):
         dt = self.game.clock.get_time() / 1000
         keys = pg.key.get_pressed()
         speed_multiplier = 1.5 if keys[pg.K_LSHIFT] else 1
 
+
+        if(self.Cooldown>0):
+            self.Cooldown-=1
+        
         # Direction Vector
         direction_x = 0
         direction_y = 0
@@ -32,8 +38,12 @@ class Player(pg.sprite.Sprite):
             direction_y = 1
         if keys[pg.K_a] or keys[pg.K_LEFT]:
             direction_x = -1
+            self.direction= "Left"
         if keys[pg.K_d] or keys[pg.K_RIGHT]:
             direction_x = 1
+            self.direction= "Right"
+        if keys[pg.K_SPACE]:
+            self.attack()
 
         # Normalize Movement
         magnitude = (direction_x ** 2 + direction_y ** 2) ** 0.5
@@ -50,6 +60,52 @@ class Player(pg.sprite.Sprite):
         self.pos.y = max(0, min(SCREEN_HEIGHT - self.rect.height, self.pos.y))
 
         self.rect.topleft = self.pos
+
+    def attack(self):
+        if self.Cooldown == 0:
+            self.Cooldown = 30
+            if(self.direction=="Right"):
+                attack = MeleeAttack((self.rect.right+5, self.rect.centery))
+            elif(self.direction=="Left"):
+                attack = MeleeAttack((self.rect.left-5, self.rect.centery))
+            self.game.attacks_group.add(attack)
+            self.game.all_sprites.add(attack)
+
+
+
+class Lady(pg.sprite.Sprite):
+    def __init__(self,game):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.image.load("assets/blob/OldLady.png")
+        self.image = pg.transform.scale(self.image, (100, 100))
+        self.rect = self.image.get_rect()
+        self.rect.y = 500
+        self.rect.x = 640
+        self.game=game
+    def talk(self):
+        print("Collided")
+
+
+class Enemy(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.image.load("assets/blob/LightningKnight.png")
+        self.image = pg.transform.scale(self.image, (100, 100))
+        self.rect = self.image.get_rect()
+        self.rect.y = 100
+        self.rect.x = 800
+
+class MeleeAttack(pg.sprite.Sprite):
+    def __init__(self, position):
+        super().__init__()
+        self.image = pg.Surface((20, 20))
+        self.image.fill((255, 0, 0))
+        self.rect = self.image.get_rect(center=position)
+        self.lifetime = 10
+    def update(self):
+        self.lifetime -= 1
+        if self.lifetime <= 0: 
+            self.kill()
 
 class SpriteSheet():
     def __init__(self, image):
