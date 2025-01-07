@@ -9,6 +9,7 @@ class Game:
         pg.display.set_caption('The Rune to The Future')
         self.clock = pg.time.Clock()
         self.font = pg.font.SysFont("Comic Sans MS", 30)
+
         
         # Load sprite sheet image and create SpriteSheet object
         self.sprite_sheet_image = pg.image.load('assets/verden/sheet.png').convert_alpha()
@@ -20,6 +21,8 @@ class Game:
         self.new()
 
     def new(self):        
+        self.showdialogue=False
+        self.dialoguenumb=0
         self.all_sprites = pg.sprite.Group()
         self.player = Player(self.screen, self)
         self.all_sprites.add(self.player)
@@ -32,6 +35,9 @@ class Game:
         self.all_sprites.add(self.lady)
         self.all_sprites.add(self.enemy)
         self.attacks_group = pg.sprite.Group()
+        self.E=False
+        self.timerdialogues=0
+        self.timerE=0
         self.running = True
         self.run()
 
@@ -43,6 +49,12 @@ class Game:
             self.draw()
 
         pg.quit()
+    def dialogue(self):
+        if self.dialoguenumb==0:
+            self.dialogue_text= self.font.render("Yo wassup", True, (255,255,255,255))
+        if self.dialoguenumb==1:
+            self.dialogue_text= self.font.render("I'm not old, YOU ARE", True, (255,255,255,255))
+        self.showdialogue=True
 
     def events(self):
         for event in pg.event.get():
@@ -61,8 +73,16 @@ class Game:
         if collider:
             self.enemy.kill()
         keys = pg.key.get_pressed()
+        if not Interact or self.showdialogue==True:
+            self.E=False
+        if Interact and self.showdialogue==False:
+            self.interact= self.font.render("Press E", True, (255,255,0,255))
+            self.E=True
         if keys[pg.K_e] and Interact:
-            self.lady.talk()
+            self.dialogue()
+            self.player.notMove()
+        if keys[pg.K_ESCAPE]:
+            self.running=False
 
 
     def draw(self):
@@ -71,6 +91,19 @@ class Game:
         self.screen.blit(self.frame_0, (100, 100))
 
         self.all_sprites.draw(self.screen)
+        if self.showdialogue==True:
+            self.screen.blit(self.dialogue_text, (520, 350))
+            self.timerdialogues+=1
+
+        if self.E:
+            self.screen.blit(self.interact, (520, 350))
+        if(self.timerdialogues>=100):
+            self.timerdialogues=0
+            if not self.dialoguenumb==2:
+                self.dialoguenumb+=1
+            self.showdialogue=False
+            if self.dialoguenumb==2:
+                self.player.Move()
 
         pg.display.flip()
 

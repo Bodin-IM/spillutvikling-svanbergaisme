@@ -11,6 +11,7 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.pos = pg.Vector2(self.rect.center)
+        self.canMove=True
         self.speed = 300
         self.gravity = 10
         self.jumping = False
@@ -32,17 +33,17 @@ class Player(pg.sprite.Sprite):
         direction_y = 0
 
         # Check Input for Movement
-        if keys[pg.K_w] or keys[pg.K_UP]:
+        if keys[pg.K_w] or keys[pg.K_UP] and self.canMove:
             direction_y = -1
-        if keys[pg.K_s] or keys[pg.K_DOWN]:
+        if keys[pg.K_s] or keys[pg.K_DOWN] and self.canMove:
             direction_y = 1
-        if keys[pg.K_a] or keys[pg.K_LEFT]:
+        if keys[pg.K_a] or keys[pg.K_LEFT] and self.canMove:
             direction_x = -1
             self.direction= "Left"
-        if keys[pg.K_d] or keys[pg.K_RIGHT]:
+        if keys[pg.K_d] or keys[pg.K_RIGHT] and self.canMove:
             direction_x = 1
             self.direction= "Right"
-        if keys[pg.K_SPACE]:
+        if keys[pg.K_SPACE] and self.canMove:
             self.attack()
 
         # Normalize Movement
@@ -71,6 +72,12 @@ class Player(pg.sprite.Sprite):
             self.game.attacks_group.add(attack)
             self.game.all_sprites.add(attack)
 
+    def notMove(self):
+        self.canMove=False
+
+    def Move(self):
+        self.canMove=True
+
 
 
 class Lady(pg.sprite.Sprite):
@@ -82,8 +89,6 @@ class Lady(pg.sprite.Sprite):
         self.rect.y = 500
         self.rect.x = 640
         self.game=game
-    def talk(self):
-        print("Collided")
 
 
 class Enemy(pg.sprite.Sprite):
