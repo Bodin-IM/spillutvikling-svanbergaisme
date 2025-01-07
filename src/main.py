@@ -2,19 +2,6 @@ import pygame as pg
 from settings import *
 from sprites import *
 
-class Camera:
-    def __init__(self, width, height):
-        self.offset = pg.Vector2(0, 0)
-        self.width = width
-        self.height = height
-
-    def center_on_player(self, player):
-        self.offset.x = player.rect.centerx - SCREEN_WIDTH // 2
-        self.offset.y = player.rect.centery - SCREEN_HEIGHT // 2
-
-    def apply(self, rect):
-        return rect.move(-self.offset.x, -self.offset.y)
-
 class Game:
     def __init__(self):
         pg.init()
@@ -23,6 +10,7 @@ class Game:
         self.clock = pg.time.Clock()
         self.font = pg.font.SysFont("Comic Sans MS", 30)
 
+        # Load sprite sheet
         self.tile_sheet = pg.image.load('assets/verden/sheet.png').convert_alpha()
         self.TILE_SIZE = 32  # Tile dimensions
 
@@ -40,10 +28,11 @@ class Game:
 
         # Initialize camera
         self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
-
         self.new()
 
     def new(self):
+        self.showdialogue = False
+        self.dialoguenumb = 0
         self.all_sprites = pg.sprite.Group()
         self.player = Player(self.screen, self)
         self.all_sprites.add(self.player)
@@ -56,6 +45,9 @@ class Game:
         self.all_sprites.add(self.lady)
         self.all_sprites.add(self.enemy)
         self.attacks_group = pg.sprite.Group()
+        self.E = False
+        self.timerdialogues = 0
+        self.timerE = 0
         self.running = True
         self.run()
 
@@ -65,8 +57,14 @@ class Game:
             self.events()
             self.update()
             self.draw()
-
         pg.quit()
+
+    def dialogue(self):
+        if self.dialoguenumb == 0:
+            self.dialogue_text = self.font.render("Yo wassup", True, (255, 255, 255))
+        if self.dialoguenumb == 1:
+            self.dialogue_text = self.font.render("I'm not old, YOU ARE", True, (255, 255, 255))
+        self.showdialogue = True
 
     def events(self):
         for event in pg.event.get():
@@ -75,6 +73,27 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
+        self.camera.center_on_player(self.player)
+
+        keys = pg.key.get_pressed()
+        if keys[pg.K_SPACE]:
+            attack = self.player.attack()
+            if attack:
+                self.all_sprites.add(attack)
+        collider = pg.sprite.groupcollide(self.attacks_group, self.enemies, False, False)
+        Interact = pg.sprite.spritecollide(self.player, self.npcs, False)
+        if collider:
+            self.enemy.kill()
+        if not Interact or self.showdialogue:
+            self.E = False
+        if Interact and not self.showdialogue:
+            self.interact = self.font.render("Press E", True, (255, 255, 0))
+            self.E = True
+        if keys[pg.K_e] and Interact:
+            self.dialogue()
+            self.player.notMove()
+        if keys[pg.K_ESCAPE]:
+            self.running = False
 
     def draw(self):
         self.screen.fill((50, 50, 50))
@@ -86,12 +105,27 @@ class Game:
                 y = row_index * 100
                 if tile_index >= 0:  # Only draw valid tiles
                     tile_rect = pg.Rect(x, y, 100, 100)
-                    tile_rect = self.camera.apply(tile_rect)
-                    self.screen.blit(self.tiles[tile_index], tile_rect.topleft)
+                    offset_tile_rect = self.camera.apply(tile_rect)
+                    self.screen.blit(self.tiles[tile_index], offset_tile_rect.topleft)
 
-        # Draw all sprites with the camera offset
+        # Draw sprites with the camera offset
         for sprite in self.all_sprites:
-            self.screen.blit(sprite.image, self.camera.apply(sprite.rect))
+            offset_rect = self.camera.apply(sprite.rect)
+            self.screen.blit(sprite.image, offset_rect.topleft)
+
+        if self.showdialogue:
+            self.screen.blit(self.dialogue_text, (520, 350))
+            self.timerdialogues += 1
+
+        if self.E:
+            self.screen.blit(self.interact, (520, 350))
+        if self.timerdialogues >= 100:
+            self.timerdialogues = 0
+            if not self.dialoguenumb == 2:
+                self.dialoguenumb += 1
+            self.showdialogue = False
+            if self.dialoguenumb == 2:
+                self.player.Move()
 
         pg.display.flip()
 
@@ -102,7 +136,6 @@ class Game:
         for y in range(0, sheet_height, tile_size):
             for x in range(0, sheet_width, tile_size):
                 tile = tile_sheet.subsurface((x, y, tile_size, tile_size))
-
                 scaled_tile = pg.transform.scale(tile, (target_size, target_size))
                 tiles.append(scaled_tile)
 
