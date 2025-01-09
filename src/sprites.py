@@ -25,7 +25,21 @@ class Player(pg.sprite.Sprite):
         self.screen = screen
         self.game = game
         self.image = pg.image.load("assets/blob/FirstArmor.png")
+        self.Right1 = pg.image.load("assets/blob/PlayerWalk (1).png")
+        self.Right2 = pg.image.load("assets/blob/PlayerWalk (2).png")
+        self.Right3 = pg.image.load("assets/blob/PlayerWalk (3).png")
+        self.Left1 = pg.image.load("assets/blob/PlayerWalkLeft (1).png")
+        self.Left2 = pg.image.load("assets/blob/PlayerWalkLeft (2).png")
+        self.Left3 = pg.image.load("assets/blob/PlayerWalkLeft (3).png")
         self.image = pg.transform.scale(self.image, (100, 100))
+        self.Right1 = pg.transform.scale(self.Right1, (100, 100))
+        self.Right2 = pg.transform.scale(self.Right2, (100, 100))
+        self.Right3 = pg.transform.scale(self.Right3, (100, 100))
+        self.Left1 = pg.transform.scale(self.Left1, (100, 100))
+        self.Left2 = pg.transform.scale(self.Left2, (100, 100))
+        self.Left3 = pg.transform.scale(self.Left3, (100, 100))
+        self.current_frame = 0
+        self.last_update = 0
         self.rect = self.image.get_rect()
         self.rect.center = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.pos = pg.Vector2(self.rect.center)
@@ -33,11 +47,15 @@ class Player(pg.sprite.Sprite):
         self.speed = 300
         self.Cooldown = 0
         self.direction = "Right"
+        self.standing = True
+        self.rightframes= [self.Right1, self.Right2, self.Right3]
+        self.leftframes= [self.Left1, self.Left2, self.Left3]
 
     def update(self):
         dt = self.game.clock.get_time() / 1000
         keys = pg.key.get_pressed()
         speed_multiplier = 1.5 if keys[pg.K_LSHIFT] else 1
+        self.standing = True
 
         if self.Cooldown > 0:
             self.Cooldown -= 1
@@ -50,9 +68,13 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_a] and self.canMove:
             direction_x = -1
             self.direction = "Left"
+            self.standing=False
+            self.Animate()
         if keys[pg.K_d] and self.canMove:
             direction_x = 1
             self.direction = "Right"
+            self.standing=False
+            self.Animate()
 
         magnitude = (direction_x ** 2 + direction_y ** 2) ** 0.5
         if magnitude > 0:
@@ -63,6 +85,18 @@ class Player(pg.sprite.Sprite):
         self.pos.y += direction_y * self.speed * dt * speed_multiplier
         self.rect.topleft = self.pos
 
+    def Animate(self):
+        now=pg.time.get_ticks()
+        if not self.standing:
+            if now - self.last_update > 150:
+                self.last_update = now
+                if self.direction == "Right":
+                    self.current_frame = (self.current_frame + 1) % len(self.rightframes)
+                elif self.direction == "Left":
+                    self.current_frame = (self.current_frame + 1) % len(self.leftframes)
+                self.image = self.rightframes[self.current_frame]
+                self.rect = self.image.get_rect()
+           
     def attack(self):
         if self.Cooldown == 0:
             self.Cooldown = 30
