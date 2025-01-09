@@ -43,20 +43,16 @@ class Player(pg.sprite.Sprite):
             self.Cooldown -= 1
 
         direction_x, direction_y = 0, 0
-        if keys[pg.K_w] or keys[pg.K_UP]:
-            if self.canMove:
-                direction_y = -1
-        if keys[pg.K_s] or keys[pg.K_DOWN]:
-            if self.canMove:
-                direction_y = 1
-        if keys[pg.K_a] or keys[pg.K_LEFT]:
-            if self.canMove:
-                direction_x = -1
-                self.direction = "Left"
-        if keys[pg.K_d] or keys[pg.K_RIGHT]:
-            if self.canMove:
-                direction_x = 1
-                self.direction = "Right"
+        if keys[pg.K_w]  and self.canMove:
+            direction_y = -1
+        if keys[pg.K_s]  and self.canMove:
+            direction_y = 1
+        if keys[pg.K_a] and self.canMove:
+            direction_x = -1
+            self.direction = "Left"
+        if keys[pg.K_d] and self.canMove:
+            direction_x = 1
+            self.direction = "Right"
 
         magnitude = (direction_x ** 2 + direction_y ** 2) ** 0.5
         if magnitude > 0:
