@@ -34,6 +34,8 @@ class Player(pg.sprite.Sprite):
         self.Cooldown = 0
         self.direction = "Right"
 
+        self.health_bar = HealthBar(self)
+
     def update(self):
         dt = self.game.clock.get_time() / 1000
         keys = pg.key.get_pressed()
@@ -62,6 +64,9 @@ class Player(pg.sprite.Sprite):
         self.pos.x += direction_x * self.speed * dt * speed_multiplier
         self.pos.y += direction_y * self.speed * dt * speed_multiplier
         self.rect.topleft = self.pos
+
+    def draw_health_bar(self, screen):
+        self.health_bar.draw(screen)
 
     def attack(self):
         if self.Cooldown == 0:
@@ -121,3 +126,43 @@ class SpriteSheet():
         image = pg.transform.scale(image, (width * scale, height * scale))
         image.set_colorkey(colour)
         return image
+
+class HealthBar:
+    def __init__(self, player, width=200, height=20, x_offset=10, y_offset=10):
+        self.player = player
+        self.max_health = 100  # Max health value
+        self.current_health = 100  # Current health value
+        self.width = width
+        self.height = height
+        self.x_offset = x_offset
+        self.y_offset = y_offset
+        self.font = pg.font.SysFont("Comic Sans MS", 14, bold=True)  # Bold font
+
+    def take_damage(self, amount):
+        self.current_health = max(0, self.current_health - amount)
+
+    def heal(self, amount):
+        self.current_health = min(self.max_health, self.current_health + amount)
+
+    def draw(self, screen):
+        # Positioning the health bar at the bottom left corner
+        screen_width, screen_height = screen.get_size()
+        x_pos = self.x_offset
+        y_pos = screen_height - self.height - self.y_offset
+
+        # Background bar (red)
+        bar_rect = pg.Rect(x_pos, y_pos, self.width, self.height)
+        pg.draw.rect(screen, (255, 0, 0), bar_rect)
+
+        # Foreground (current health) bar (green)
+        health_ratio = self.current_health / self.max_health
+        current_health_rect = pg.Rect(
+            x_pos, y_pos, int(self.width * health_ratio), self.height
+        )
+        pg.draw.rect(screen, (0, 255, 0), current_health_rect)
+
+        # Draw current health number inside the bar
+        health_text = f"{self.current_health}"
+        text_surface = self.font.render(health_text, True, (0, 0, 0))  # Black text
+        text_rect = text_surface.get_rect(center=(x_pos + self.width // 2, y_pos + self.height // 2))
+        screen.blit(text_surface, text_rect)
